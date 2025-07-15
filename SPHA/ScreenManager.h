@@ -40,4 +40,6 @@ public:
   int getStrWidth(const char* text);
   void drawDisc(int x, int y, int r);
   void drawCircle(int x, int y, int r);
+  void setDrawColor(uint8_t color);
+  void drawBox(int x, int y, int w, int h);
 };

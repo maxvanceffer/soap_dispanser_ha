@@ -15,7 +15,7 @@ class SettingsScreen : public IScreen {
 public:
   explicit SettingsScreen(StorageManager* storage);
   const char* getTitle() override;
-  void draw(U8G2* display) override;
+  void draw(ScreenManager* manager) override;
   void onRotate(int direction) override;
   void onRotaryClick() override;
   void onRotaryDoubleClick() override;

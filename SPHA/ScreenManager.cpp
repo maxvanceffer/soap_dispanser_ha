@@ -144,3 +144,11 @@ void ScreenManager::drawDisc(int x, int y, int r) {
 void ScreenManager::drawCircle(int x, int y, int r) {
   display.drawCircle(x, y, r);
 }
+
+void ScreenManager::setDrawColor(uint8_t color) {
+  display.setDrawColor(color);
+}
+
+void ScreenManager::drawBox(int x, int y, int w, int h) {
+  display.drawBox(x, y, w, h);
+}

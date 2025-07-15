@@ -1,4 +1,5 @@
 #include "SettingsScreen.h"
+#include "../ScreenManager.h"
 
 SettingsScreen::SettingsScreen(StorageManager* storage) : storage(storage) {
   options.push_back({
@@ -20,9 +21,9 @@ const char* SettingsScreen::getTitle() {
   return "Settings";
 }
 
-void SettingsScreen::draw(U8G2* display) {
-  display->setFont(u8g2_font_6x10_tf);
-  display->clearBuffer();
+void SettingsScreen::draw(ScreenManager* manager) {
+  manager->setFont(u8g2_font_6x10_tf);
+  manager->clearBuffer();
 
   for (int i = 0; i < options.size(); ++i) {
     String label = options[i].label;
@@ -34,17 +35,17 @@ void SettingsScreen::draw(U8G2* display) {
     int y = 12 * (i + 1);
 
     if (i == selectedIndex) {
-      display->setDrawColor(1);       // Белый фон
-      display->drawBox(0, y - 10, 128, 12);
-      display->setDrawColor(0);       // Чёрный текст
-      display->drawStr(2, y, line.c_str());
-      display->setDrawColor(1);       // Вернуть цвет текста
+      manager->setDrawColor(1);       // Белый фон
+      manager->drawBox(0, y - 10, 128, 12);
+      manager->setDrawColor(0);       // Чёрный текст
+      manager->drawStr(2, y, line.c_str());
+      manager->setDrawColor(1);       // Вернуть цвет текста
     } else {
-      display->drawStr(2, y, line.c_str());
+      manager->drawStr(2, y, line.c_str());
     }
   }
 
-  display->sendBuffer();
+  manager->sendBuffer();
 }
 
 void SettingsScreen::onRotate(int direction) {
@@ -66,11 +67,11 @@ void SettingsScreen::onRotate(int direction) {
   }
 }
 
-void SettingsScreen::onClick() {
+void SettingsScreen::onRotaryClick() {
   editing = !editing;
 }
 
-void SettingsScreen::onDoubleClick() {
+void SettingsScreen::onRotaryDoubleClick() {
   for (const auto& option : options) {
     String rawValue = option.isBool ? (option.value == "On" ? "true" : "false") : option.value;
     storage->setItem(option.key, rawValue);

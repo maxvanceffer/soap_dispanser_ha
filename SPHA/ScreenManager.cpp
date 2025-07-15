@@ -18,8 +18,8 @@ ScreenManager::ScreenManager(StorageManager* storage, BatteryManager* battery, T
       screens.push_back(new ClockScreen(time));
 
       if (storage->isKeySetAndNotEmpty("ha_endpoint") && storage->isKeySetAndNotEmpty("ha_ip") && storage->isKeySetAndNotEmpty("ha_token")) {
-        Serial.println("HA integration is setup, add sensor screen")
-        screens.push_back(new SensorScreen(storage))
+        Serial.println("HA integration is setup, add sensor screen");
+        screens.push_back(new SensorScreen(storage));
       }
     }
 

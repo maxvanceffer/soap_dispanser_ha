@@ -11,6 +11,7 @@
 class SetupManager {
 public:
     SetupManager(StorageManager& storage, SleepTimer& sleepTimer, ScreenManager& screenManager);
+
     void begin();
     void loop();
 

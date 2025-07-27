@@ -31,20 +31,46 @@ public:
     }
 
     void begin() {
+        Serial.println("SoapMotor:begin started");
         pinMode(MOTOR_IN1, OUTPUT);
+        Serial.println("SoapMotor:begin MOTOR_IN1, OUTPUT");
         pinMode(MOTOR_IN2, OUTPUT);
+        Serial.println("SoapMotor:begin MOTOR_IN2, OUTPUT");
+//        pinMode(MOTOR_N_SLEEP, OUTPUT);
+//        Serial.println("SoapMotor:begin MOTOR_N_SLEEP, OUTPUT");
         digitalWrite(MOTOR_IN1, LOW);
+        Serial.println("SoapMotor:begin MOTOR_IN1, LOW");
         digitalWrite(MOTOR_IN2, LOW);
+        Serial.println("SoapMotor:begin MOTOR_IN2, LOW");
+//        digitalWrite(MOTOR_N_SLEEP, LOW); // Ensure motor driver is in sleep mode initially
+//        Serial.println("SoapMotor:begin MOTOR_N_SLEEP, LOW");
+        Serial.println("SoapMotor:begin finished");
     }
 
     void dispense() {
         unsigned int duration = getDurationForMode(_mode);
+        Serial.println("Dispense started");
+        Serial.println(duration);
 
+        // Wake up the motor driver
+        digitalWrite(MOTOR_N_SLEEP, HIGH);
+        delay(5); // Small delay to ensure the driver is fully awake
+        
+        // Start the motor
         digitalWrite(MOTOR_IN1, HIGH);
         digitalWrite(MOTOR_IN2, LOW);
+        
+        // Run for the specified duration
         delay(duration);
+        Serial.println("Delay resumed");
+        
+        // Stop the motor
         digitalWrite(MOTOR_IN1, LOW);
         digitalWrite(MOTOR_IN2, LOW);
+        
+        // Put the motor driver back to sleep
+        digitalWrite(MOTOR_N_SLEEP, LOW);
+        Serial.println("Dispense stoped");
     }
 
 private:

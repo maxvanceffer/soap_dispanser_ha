@@ -1,26 +1,101 @@
 #include <Arduino.h>
+#include "esp_sleep.h"
+#include "driver/gpio.h"
 #include "GPIO.h"
+#include "Features.h"
 #include "StorageManager.h"
-#include "SoapMotor.h"
-#include "SleepTimer.h"
-#include "DistanceSensor.h"
-#include "BatteryManager.h"
-#include "SetupManager.h"
-#include "ScreenManager.h"
-#include "TimeManager.h"
-#include "MotionManager.h"
-#include "./screens/Screens.cpp"
+#include "Utils.h"
 
+#if FEATURE_SOAP_MOTOR
+  #include "SoapMotor.h"
+#endif
+
+#if FEATURE_SLEEP_TIMER
+  #include "SleepTimer.h"
+#endif
+
+#if FEATURE_DISTANCE_SENSOR
+  #include "DistanceSensor.h"
+#endif
+
+#if FEATURE_BATTERY_MANAGER
+  #include "BatteryManager.h"
+#endif
+
+#if FEATURE_SETUP_MANAGER
+  #include "SetupManager.h"
+#endif
+
+#if FEATURE_SCREEN
+  #include "ScreenManager.h"
+#endif
+
+#if FEATURE_TIME_MANAGER
+  #include "TimeManager.h"
+#endif
+
+#if FEATURE_MOTION_SENSOR
+  #include "MotionManager.h"
+#endif
+
+#if FEATURE_SCREEN
+  #include "./screens/Screens.cpp"
+#endif
+
+#if FEATURE_STORAGE
 StorageManager storage;
-// DistanceSensor distanceSensor;
-// SoapMotor soapMotor(storage);
-SleepTimer sleepTimer(storage);
-BatteryManager batteryManager(storage);
-TimeManager timeManager(storage);
-ScreenManager screenManager(&storage, &batteryManager, &timeManager);
-// MotionManager motionManager(&sleepTimer);
+#endif
 
+#if FEATURE_DISTANCE_SENSOR
+DistanceSensor distanceSensor;
+#endif
+
+#if FEATURE_SOAP_MOTOR
+SoapMotor soapMotor(storage);
+#endif
+
+#if FEATURE_SLEEP_TIMER
+SleepTimer sleepTimer(storage);
+#endif
+
+#if FEATURE_BATTERY_MANAGER
+BatteryManager batteryManager(storage);
+#endif
+
+#if FEATURE_TIME_MANAGER
+TimeManager timeManager(storage);
+#endif
+
+#if FEATURE_SCREEN
+ScreenManager screenManager(&storage, 
+  #if FEATURE_BATTERY_MANAGER
+    &batteryManager, 
+  #else
+    nullptr,
+  #endif
+  #if FEATURE_TIME_MANAGER
+    &timeManager
+  #else
+    nullptr
+  #endif
+);
+#endif
+
+#if FEATURE_MOTION_SENSOR
+MotionManager motionManager(
+  #if FEATURE_SLEEP_TIMER
+    &sleepTimer
+  #else
+    nullptr
+  #endif
+);
+#endif
+
+#if FEATURE_SETUP_MANAGER
 SetupManager* setupManager = nullptr;
+#else
+void* setupManager = nullptr; // Dummy pointer to maintain code compatibility
+#endif
 
 unsigned long lastDispenseTime = 0;
 
@@ -28,75 +103,105 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Soap Dispenser");
 
-  if (!LittleFS.begin(true)) {
-     Serial.println("❌ Failed to mount LittleFS even after formatting");
-  } else {
-     Serial.println("✅ LittleFS mounted successfully");
-  }
+  #if FEATURE_SOAP_MOTOR
+    soapMotor.begin();
+  #endif
 
-  File file = LittleFS.open("/test.txt", "w");
-  if (!file) {
-    Serial.println("❌ Failed to create file");
-  } else {
-    file.println("LittleFS works!");
-    file.close();
-    Serial.println("✅ Test file written");
-  }
+  #if FEATURE_STORAGE
+    storage.begin();
+  #endif
 
-  storage.begin();
-//   screenManager.begin();
-//   motionManager.begin();
-//   motionManager.attachMotionInterrupt();
+  #if FEATURE_DISTANCE_SENSOR
+    distanceSensor.begin();
+  #endif
 
-  // storage.setItem("initial_setup", "true");
+  #if FEATURE_SCREEN
+    screenManager.begin();
+  #endif
 
-  // Check initial setup mode
-  if (storage.getItem("initial_setup", "true") == "true") {
-    Serial.println("Initial setup called");
-    // setupManager = new SetupManager(storage, sleepTimer, screenManager);
-    // setupManager->begin();
-  } else {
-    Serial.println("Normal routine started");
-//     soapMotor.begin();
+  #if FEATURE_MOTION_SENSOR
+    motionManager.begin();
+    motionManager.attachMotionInterrupt();
+  #endif
 
-//     esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
-//     if (wakeup_reason == ESP_SLEEP_WAKEUP_EXT0) {
-//       Serial.println("Dispensing soap...");
-//       soapMotor.dispense();
-//     }
+  #if FEATURE_DISTANCE_SENSOR
+    // Пробуждение от ИК-датчика
+    esp_deep_sleep_enable_gpio_wakeup(1 << DISTANCE_SENSOR_PIN, ESP_GPIO_WAKEUP_GPIO_HIGH);
+    gpio_set_direction((gpio_num_t)DISTANCE_SENSOR_PIN, GPIO_MODE_INPUT);
+  #endif
 
-    Serial.print("Wakeup reason: ");
-//     Serial.println(wakeup_reason);
+  // Проверка причины пробуждения
+  esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+  Serial.print("Wakeup reason: ");
+  Serial.println(wakeup_reason);
 
-  //   distanceSensor.begin();
-  //   batteryManager.begin();
-  //   batteryManager.update();
-  //   Serial.print("Battery: ");
-  //   Serial.print(batteryManager.getPercentage());
-  //   Serial.println("%");
+  #if FEATURE_STORAGE && FEATURE_SETUP_MANAGER
+    if (storage.getItem("initial_setup", "true") == "true") {
+      Serial.println("Initial setup called");
+      #if FEATURE_SCREEN
+        setupManager = new SetupManager(storage, sleepTimer, screenManager);
+        setupManager->begin();
+      #else
+        Serial.println("Setup requires screen feature to be enabled");
+      #endif
+    } else {
+      Serial.println("Normal routine started");
+  #else
+    {
+      Serial.println("Normal routine started");
+  #endif
 
-    // pinMode(ROTARY_WAKEUP_PIN, INPUT);
-    // esp_sleep_enable_ext0_wakeup(ROTARY_WAKEUP_PIN, 1);
-    // esp_sleep_enable_ext0_wakeup((gpio_num_t)PIR_GPIO, 1);
+    #if FEATURE_DISTANCE_SENSOR && FEATURE_SOAP_MOTOR
+      if (wakeup_reason == ESP_SLEEP_WAKEUP_EXT0) {
+        Serial.println("🖐 Обнаружена рука — подача мыла!");
+        soapMotor.dispense();
+        lastDispenseTime = millis();
+      }
+    #endif
 
-    sleepTimer.start();
+    #if FEATURE_BATTERY_MANAGER
+      batteryManager.begin();
+      batteryManager.update();
+      Serial.print("Battery: ");
+      Serial.print(batteryManager.getPercentage());
+      Serial.println("%");
+    #endif
+
+    #if FEATURE_SLEEP_TIMER
+      sleepTimer.start();
+    #endif
   }
 }
 
 void loop() {
-  if (setupManager) {
-//     setupManager->loop();
-    return;
-  }
+  #if FEATURE_SETUP_MANAGER
+    if (setupManager) {
+      setupManager->loop();
+      return;
+    }
+  #endif
 
-//   sleepTimer.update();
-  // batteryManager.update();
-  // screenManager.draw();
+  #if FEATURE_SLEEP_TIMER
+    sleepTimer.update();
+  #endif
 
-  // if (distanceSensor.detectHand() && millis() - lastDispenseTime > 2000) {
-  //   Serial.println("Detected hand again — dispensing soap.");
-  //   soapMotor.dispense();
-  //   lastDispenseTime = millis();
-  //   sleepTimer.start(); // restart timer
-  // }
+  #if FEATURE_BATTERY_MANAGER
+    batteryManager.update();
+  #endif
+
+  #if FEATURE_SCREEN
+    screenManager.draw();
+  #endif
+
+  #if FEATURE_DISTANCE_SENSOR && FEATURE_SOAP_MOTOR
+    if (distanceSensor.detectHand() && millis() - lastDispenseTime > 2000) {
+      Serial.println("🖐 Рука снова обнаружена — подаём мыло.");
+      soapMotor.dispense();
+      lastDispenseTime = millis();
+      
+      #if FEATURE_SLEEP_TIMER
+        sleepTimer.start(); // restart timer
+      #endif
+    }
+  #endif
 }

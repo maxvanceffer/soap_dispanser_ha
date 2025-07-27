@@ -5,11 +5,11 @@
 class DistanceSensor {
 public:
     void begin() {
-        pinMode(DISTANCE_SENSOR_PIN, INPUT);
+        pinMode(DISTANCE_SENSOR_PIN, INPUT_PULLUP);  // Включаем подтяжку
     }
 
     bool detectHand() {
-        int raw = analogRead(DISTANCE_SENSOR_PIN);
-        return raw < 1000; // порог — можно подстроить
+        bool detected = digitalRead(DISTANCE_SENSOR_PIN) == LOW;
+        return detected;
     }
 };

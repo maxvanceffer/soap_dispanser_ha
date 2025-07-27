@@ -13,7 +13,6 @@ This project provides an Arduino-based solution for integrating a soap dispenser
 
 - `src/` - Contains all source code files
   - `SPHA.ino` - Main Arduino sketch
-  - `Cache.h` and `Cache.cpp` - Cache class for configuration storage
   - `README.md` - Detailed documentation
 
 ## Getting Started

@@ -1,5 +1,5 @@
 #include "DeviceInfoScreen.h"
-#include "../ScreenManager.h"
+#include "../../ScreenManager.h"
 #include <WiFi.h>
 
 DeviceInfoScreen::DeviceInfoScreen(StorageManager* storage, BatteryManager* battery) : storage(storage), battery(battery) {

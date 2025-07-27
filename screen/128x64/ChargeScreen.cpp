@@ -1,5 +1,5 @@
 #include "ChargeScreen.h"
-#include "../ScreenManager.h"
+#include "../../ScreenManager.h"
 
 ChargeScreen::ChargeScreen(BatteryManager* battery) : battery(battery) {
   // Constructor implementation

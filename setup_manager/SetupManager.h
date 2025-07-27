@@ -3,10 +3,10 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
-#include "StorageManager.h"
-#include "SleepTimer.h"
-#include "ScreenManager.h"
-#include "index_html.h"
+#include "../storage/StorageManager.h"
+#include "../sleep_timer/SleepTimer.h"
+#include "../screen/ScreenManager.h"
+#include "../index_html.h"
 
 class SetupManager {
 public:

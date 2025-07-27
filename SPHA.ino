@@ -3,43 +3,43 @@
 #include "driver/gpio.h"
 #include "GPIO.h"
 #include "Features.h"
-#include "StorageManager.h"
+#include "storage/StorageManager.h"
 #include "Utils.h"
 
 #if FEATURE_SOAP_MOTOR
-  #include "SoapMotor.h"
+  #include "soap_motor/SoapMotor.h"
 #endif
 
 #if FEATURE_SLEEP_TIMER
-  #include "SleepTimer.h"
+  #include "sleep_timer/SleepTimer.h"
 #endif
 
 #if FEATURE_DISTANCE_SENSOR
-  #include "DistanceSensor.h"
+  #include "distance_sensor/DistanceSensor.h"
 #endif
 
 #if FEATURE_BATTERY_MANAGER
-  #include "BatteryManager.h"
+  #include "battery_manager/BatteryManager.h"
 #endif
 
 #if FEATURE_SETUP_MANAGER
-  #include "SetupManager.h"
+  #include "setup_manager/SetupManager.h"
 #endif
 
 #if FEATURE_SCREEN
-  #include "ScreenManager.h"
+  #include "screen/ScreenManager.h"
 #endif
 
 #if FEATURE_TIME_MANAGER
-  #include "TimeManager.h"
+  #include "time_manager/TimeManager.h"
 #endif
 
 #if FEATURE_MOTION_SENSOR
-  #include "MotionManager.h"
+  #include "motion_sensor/MotionManager.h"
 #endif
 
 #if FEATURE_SCREEN
-  #include "./screens/Screens.cpp"
+  #include "./screen/128x64/Screens.cpp"
 #endif
 
 #if FEATURE_STORAGE

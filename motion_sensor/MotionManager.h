@@ -2,7 +2,7 @@
 #define MOTION_MANAGER_H
 
 #include <Arduino.h>
-#include "SleepTimer.h"
+#include "../sleep_timer/SleepTimer.h"
 
 class MotionManager {
   public:

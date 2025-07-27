@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
-#include "StorageManager.h"
-#include "GPIO.h"
+#include "../storage/StorageManager.h"
+#include "../GPIO.h"
 
 class SoapMotor {
 public:

@@ -1,5 +1,5 @@
 #include "SetupInfoScreen.h"
-#include "../ScreenManager.h"
+#include "../../ScreenManager.h"
 
 SetupInfoScreen::SetupInfoScreen(std::initializer_list<String> lines, const String& icon, unsigned long autoDismissMs, bool showSpinner)
   : lines(lines), icon(icon), autoDismissMs(autoDismissMs), showSpinner(showSpinner) {

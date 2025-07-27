@@ -9,9 +9,19 @@ This project provides an Arduino-based solution for integrating a soap dispenser
 - Configurable settings stored in a persistent cache
 - Support for ESP32 boards with file system capabilities
 
+## Hardware Components
+
+- **ESP32-C3** - Low-power RISC-V microcontroller with Wi-Fi connectivity
+- **SSD1309 OLED Display** - 2.4 inch 128x64 pixel OLED display module with 7-pin SPI/IIC I2C interface for Arduino
+- **DRV8833** - Dual H-bridge motor driver for controlling the soap dispensing motor
+- **18650 Lithium Battery** - 3.7V lithium-ion rechargeable battery for power supply
+- **MH-CD42 DC 5V 2.1A** - Power management module for charging
+- **Mobile Power Supply Board** - Battery management system
+- **4.2V Charge/Discharge Module** - Boost converter with battery protection and indicator for 3.7V lithium battery
+
 ## Project Structure
 
-- `src/` - Contains all source code files
+  - `src/` - Contains all source code files
   - `SPHA.ino` - Main Arduino sketch
   - `README.md` - Detailed documentation
 

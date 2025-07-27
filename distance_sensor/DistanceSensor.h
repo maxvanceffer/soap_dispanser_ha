@@ -1,6 +1,6 @@
 #pragma once
 #include <Arduino.h>
-#include "GPIO.h"
+#include "../GPIO.h"
 
 class DistanceSensor {
 public:

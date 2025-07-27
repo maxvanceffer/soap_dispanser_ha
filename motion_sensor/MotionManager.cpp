@@ -1,5 +1,5 @@
 #include "MotionManager.h"
-#include "GPIO.h"
+#include "../GPIO.h"
 
 SleepTimer* MotionManager::sleepTimerInstance = nullptr;
 

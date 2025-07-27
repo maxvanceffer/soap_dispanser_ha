@@ -1,5 +1,5 @@
 #include "SettingsScreen.h"
-#include "../ScreenManager.h"
+#include "../../ScreenManager.h"
 
 SettingsScreen::SettingsScreen(StorageManager* storage) : storage(storage) {
   options.push_back({

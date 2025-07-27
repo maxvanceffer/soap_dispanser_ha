@@ -2,7 +2,7 @@
 
 #include "SetupManager.h"
 #include <ArduinoJson.h>
-#include "./screens/SetupInfoScreen.h"
+#include "../screen/128x64/SetupInfoScreen.h"
 
 SetupManager::SetupManager(StorageManager& storage, SleepTimer& sleepTimer, ScreenManager& screenManager)
     : _storage(storage), _sleepTimer(sleepTimer), _screenManager(screenManager), _server(80), _clientConnected(false) {}

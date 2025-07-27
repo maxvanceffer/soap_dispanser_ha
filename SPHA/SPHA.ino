@@ -101,7 +101,7 @@ unsigned long lastDispenseTime = 0;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("Soap Dispenser");
+  Serial.println("SoapDispenserOS started");
 
   #if FEATURE_SOAP_MOTOR
     soapMotor.begin();

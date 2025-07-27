@@ -1,4 +1,4 @@
-# SPHA - Soap Dispenser Home Assistant Integration
+# SoapDispenserOs - Soap Dispenser Operating System
 
 This project provides an Arduino-based solution for integrating a soap dispenser with Home Assistant.
 
@@ -7,7 +7,7 @@ This project provides an Arduino-based solution for integrating a soap dispenser
 - Detects when soap is dispensed using an analog sensor
 - Integrates with Home Assistant via MQTT
 - Configurable settings stored in a persistent cache
-- Support for ESP8266 and ESP32 boards with file system capabilities
+- Support for ESP32 boards with file system capabilities
 
 ## Project Structure
 
@@ -28,7 +28,7 @@ For more detailed instructions, see the [src/README.md](SPHA/README.md) file.
 
 ## License
 
-This project is licensed under the terms of the license included in the repository.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 

@@ -11,12 +11,13 @@ This project provides an Arduino-based solution for integrating a soap dispenser
 
 ## Hardware Components
 
-- **ESP32-C3** - Low-power RISC-V microcontroller with Wi-Fi connectivity
-- **SSD1309 OLED Display** - 2.4 inch 128x64 pixel OLED display module with 7-pin SPI/IIC I2C interface for Arduino
+- **ESP32-C3** - Low-power RISC-V microcontroller. Any other versions of esp32 will be supported in future.
+- **SSD1309 OLED Display** - OLED display module with 4-pin SPI/IIC I2C (right now only supported 2.4 inch 128x64px)
 - **DRV8833** - Dual H-bridge motor driver for controlling the soap dispensing motor
 - **18650 Lithium Battery** - 3.7V lithium-ion rechargeable battery for power supply
-- **MH-CD42 DC 5V 2.1A** - Power management module for charging
-- **Mobile Power Supply Board** - Battery management system
+- **DC-DC Step down MP1584EN 3A** - For power up esp32 and other wakeup devices.
+- **Proximity Sensor Obstacle Avoidance** - For hand detection, as wakeup device and soap dispense.
+- **PIR Motion Human AM312** - Wakeup device, for screen wakeup. 
 - **4.2V Charge/Discharge Module** - Boost converter with battery protection and indicator for 3.7V lithium battery
 
 ## Project Structure

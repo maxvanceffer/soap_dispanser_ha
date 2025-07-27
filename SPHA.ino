@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include "esp_sleep.h"
-#include "driver/gpio.h"
 #include "GPIO.h"
 #include "Features.h"
-#include "storage/StorageManager.h"
 #include "Utils.h"
+#include "esp_sleep.h"
+#include "driver/gpio.h"
+#include "storage/StorageManager.h"
 
 #if FEATURE_SOAP_MOTOR
   #include "soap_motor/SoapMotor.h"
@@ -125,12 +125,12 @@ void setup() {
   #endif
 
   #if FEATURE_DISTANCE_SENSOR
-    // Пробуждение от ИК-датчика
+    // wakeup ir setup
     esp_deep_sleep_enable_gpio_wakeup(1 << DISTANCE_SENSOR_PIN, ESP_GPIO_WAKEUP_GPIO_HIGH);
     gpio_set_direction((gpio_num_t)DISTANCE_SENSOR_PIN, GPIO_MODE_INPUT);
   #endif
 
-  // Проверка причины пробуждения
+  // Check reason of wakeup
   esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
   Serial.print("Wakeup reason: ");
   Serial.println(wakeup_reason);

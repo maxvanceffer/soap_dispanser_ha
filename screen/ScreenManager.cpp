@@ -6,24 +6,50 @@
 #include "./screens/SensorScreen.h"
 #include "./screens/SetupInfoScreen.h"
 #include "./screens/WeatherScreen.h"
+#include "../Container.h"
 
-ScreenManager::ScreenManager(StorageManager* storage, BatteryManager* battery, TimeManager* time)
-  : display(U8G2_R0, /* clock=*/ 22, /* data=*/ 21, /* reset=*/ U8X8_PIN_NONE),
-    storage(storage),
-    battery(battery),
-    time(time) {
+ScreenManager::ScreenManager(): display(U8G2_R0, /* clock=*/ 22, /* data=*/ 21, /* reset=*/ U8X8_PIN_NONE) {
+    StorageManager storage = Container::getInstance()->getStorage();
 
     if (storage->isKeySetAndNotEmpty("wifi_ssid") && storage->isKeySetAndNotEmpty("wifi_password")) {
       Serial.println("WiFi credentials found, adding ClockScreen");
-      screens.push_back(new ClockScreen(time));
+      screens.push_back(new ClockScreen());
 
       if (storage->isKeySetAndNotEmpty("ha_endpoint") && storage->isKeySetAndNotEmpty("ha_ip") && storage->isKeySetAndNotEmpty("ha_token")) {
         Serial.println("HA integration is setup, add sensor screen");
-        screens.push_back(new SensorScreen(storage));
+        screens.push_back(new SensorScreen());
       }
     }
 
-    screens.push_back(new DeviceInfoScreen(storage, battery));
+    screens.push_back(new DeviceInfoScreen());
+}
+
+String ScreenManager::name() const override {
+    return "Screen";
+}
+
+ServiceValue ScreenManager::getValue(String key) const override {
+    if (key == "currentIndex") {
+        return ServiceValue(currentIndex);
+    }
+
+    return ServiceValue();
+}
+
+bool ScreenManager::execute(String fnName, JsonVariant args) override {
+    if (fnName == "begin") {
+        return begin();
+    } else if (fnName == "next") {
+        return next();
+    } else if (fnName == "prev") {
+        return prev();
+    } else if (fnName == "click") {
+        return click();
+    } else if (fnName == "doubleClick") {
+        return doubleClick();
+    }
+
+    return false;
 }
 
 void ScreenManager::begin() {

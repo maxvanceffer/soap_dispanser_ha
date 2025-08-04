@@ -25,16 +25,21 @@
 
 // Core components (minimal working set)
 #define FEATURE_DISTANCE_SENSOR 1  // IR sensor to detect hands
-#define FEATURE_STORAGE 1          // Storage for settings (required by most components)
 #define FEATURE_SOAP_MOTOR 1       // Motor for dispensing soap
 #define FEATURE_SLEEP_TIMER 1      // Timer for sleep mode (required for power management)
 
+// Core components variants
+#define FEATURE_DISTANCE_PIR_SENSOR 0 // Use PIR sensor for detecting hand (only one must be enabled at time)
+#define FEATURE_DISTANCE_TOF_SENSOR 1 // Use TOF sensor for detecting hand (only one must be enabled at time)
+
 // Optional components
-#define FEATURE_BATTERY_MANAGER 0  // Battery monitoring
-#define FEATURE_TIME_MANAGER 0     // Time-related functions
-#define FEATURE_SCREEN 0           // OLED display
-#define FEATURE_MOTION_SENSOR 0    // PIR motion detection
-#define FEATURE_SETUP_MANAGER 0    // Initial setup mode
+#define FEATURE_BATTERY_MANAGER 0   // Battery monitoring
+#define FEATURE_TIME_MANAGER 0      // Time-related functions
+#define FEATURE_MOTION_SENSOR 0     // PIR motion detection
+#define FEATURE_SETUP_MANAGER 0     // Initial setup mode
+
+#define FEATURE_SCREEN 0            // OLED display
+#define FEATURE_SCREEN_128x64 1     // OLED display resolution
 
 // Screen features (only relevant if FEATURE_SCREEN is enabled)
 #define FEATURE_CLOCK_SCREEN 0     // Clock display screen

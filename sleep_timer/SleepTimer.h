@@ -1,13 +1,45 @@
 #pragma once
 #include <Arduino.h>
-#include "../storage/StorageManager.h"
+#include "../Container.h"
+#include "../IService.h"
 
-class SleepTimer {
+class SleepTimer: public IService {
 public:
-    SleepTimer(StorageManager& storage)
-      : _storage(storage), _active(false), _startTime(0)
-    {
-        _timeoutMs = _storage.getItem<uint32_t>("sleep_timeout_ms", 10000, true);
+    SleepTimer(): _active(false), _startTime(0) {
+        addSupportFeature("hibernate", true);
+
+        _timeoutMs = Container::getInstance()
+          .getStorage()
+          .getItem<uint32_t>("sleep_timeout_ms", 10000, true);
+
+        setReady(true);
+    }
+
+    String name() const override {
+        return "SleepTimer";
+    }
+
+    ServiceValue getValue(String key) const override {
+        if (key == "timeout") {
+            return ServiceValue(_timeoutMs);
+        } else if (key == "active") {
+            return ServiceValue(_active);
+        }
+
+        return ServiceValue();
+    }
+
+    bool execute(String fnName, JsonVariant args) override {
+        if (fnName == "start") {
+            return start();
+        } else if (fnName == "stop") {
+            return stop();
+        } else if (fnName == "update") {
+            update();
+            return true;
+        }
+
+        return false;
     }
 
     void setTimeout(uint32_t timeoutMs) {
@@ -16,25 +48,36 @@ public:
         _storage.save();
     }
 
-    void start() {
+    bool start() {
+        if (_active) {
+          Serial.println("SleepTimer:start is already running");
+          return false;
+        }
+
         _startTime = millis();
         _active = true;
+        return true;
     }
 
-    void stop() {
+    bool stop() {
+        if (_active == false) {
+          Serial.println("SleepTimer:start is already stopped");
+          return false;
+        }
+
         _active = false;
+        return true;
     }
 
-    void update() {
+    bool update() {
         if (_active && millis() - _startTime >= _timeoutMs) {
             Serial.println("Timeout reached. Going to deep sleep...");
-            delay(100);  // дать время сериалу перед сном
+            delay(100);
             esp_deep_sleep_start();
         }
     }
 
 private:
-    StorageManager& _storage;
     uint32_t _timeoutMs;
     uint32_t _startTime;
     bool _active;

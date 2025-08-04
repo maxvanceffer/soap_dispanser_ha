@@ -18,7 +18,9 @@
 #define OLED_SCL 22 // not yet soldered
 
 // Distance IR sensor
-#define DISTANCE_SENSOR_PIN 4 // already soldered
+#define DISTANCE_SENSOR_PIR_PIN 4 // not yet soldered
+#define DISTANCE_SENSOR_TOF_SDA_PIN 21 //
+#define DISTANCE_SENSOR_TOF_SCL_PIN 22 //
 
 // PIR sensor
 #define PIR_GPIO 2 // already soldered

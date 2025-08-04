@@ -1,9 +1,10 @@
 #pragma once
 #include <Arduino.h>
+#include "../IService.h"
 #include "../storage/StorageManager.h"
 #include "../GPIO.h"
 
-class SoapMotor {
+class SoapMotor: public IService {
 public:
     enum class Mode {
         SMALL,
@@ -11,11 +12,13 @@ public:
         LARGE
     };
 
-    SoapMotor(StorageManager& storage) : _storage(storage) {
+    SoapMotor(StorageManager& storage) : _storage(storage), dispensing(false) {
         String value = _storage.getItem<String>("soap_mode", "MEDIUM");
         if (value == "SMALL") _mode = Mode::SMALL;
         else if (value == "LARGE") _mode = Mode::LARGE;
         else _mode = Mode::MEDIUM;
+
+        addSupportFeature("dispense", true)
     }
 
     void setMode(Mode mode) {
@@ -48,6 +51,12 @@ public:
     }
 
     void dispense() {
+        if (dispensing === true) {
+          Serial.println("Dispense already running");
+          return;
+        }
+
+        dispensing = true;
         unsigned int duration = getDurationForMode(_mode);
         Serial.println("Dispense started");
         Serial.println(duration);
@@ -71,11 +80,32 @@ public:
         // Put the motor driver back to sleep
         digitalWrite(MOTOR_N_SLEEP, LOW);
         Serial.println("Dispense stoped");
+        dispensing = false;
+    }
+
+    String name() const override {
+        return "SoapMotor";
+    }
+
+    ServiceValue getValue(String key) {
+      if (key === "isDispensing") return ServiceValue(dispensing);
+
+      return ServiceValue();
+    }
+
+    bool execute(String fnName, JsonVariant args) {
+      if (fnName === "dispense") {
+        dispense();
+        return ture;
+      }
+
+      return false;
     }
 
 private:
     StorageManager& _storage;
     Mode _mode;
+    bool dispensing;
 
     unsigned int getDurationForMode(Mode mode) {
         switch (mode) {

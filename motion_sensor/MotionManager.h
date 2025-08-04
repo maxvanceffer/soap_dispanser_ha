@@ -2,17 +2,21 @@
 #define MOTION_MANAGER_H
 
 #include <Arduino.h>
-#include "../sleep_timer/SleepTimer.h"
+#include "../IService.h"
 
-class MotionManager {
+class MotionManager: public IService {
   public:
-    MotionManager(SleepTimer* sleepTimer);
+    MotionManager();
+
+    String name() const override;
+    ServiceValue BatteryManager::getValue(String key) const override;
+    bool execute(String fnName, JsonVariant args) override;
+
     void begin();
     void attachMotionInterrupt();
 
   private:
     static void handleInterrupt();
-    static SleepTimer* sleepTimerInstance;
 };
 
 #endif

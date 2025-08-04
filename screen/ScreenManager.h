@@ -3,25 +3,29 @@
 
 #include <vector>
 #include <U8g2lib.h>
-#include "./screens/IScreen.h"
-#include "StorageManager.h"
-#include "TimeManager.h"
-#include "BatteryManager.h"
 #include "GPIO.h"
+#include "Features.h"
+#include "../IService.h"
 
-class ScreenManager {
+#if FEATURE_SCREEN_128x64
+  #include "./screens/128x64/IScreen.h"
+#endif
+
+class ScreenManager: public IService {
 private:
   std::vector<IScreen*> screens;
   int currentIndex = 0;
   U8G2_SSD1306_128X64_NONAME_F_SW_I2C display;
-  BatteryManager* battery;
-  StorageManager* storage;
-  TimeManager* time;
 
   void drawPageIndicator();
 
 public:
-  ScreenManager(StorageManager* storage, BatteryManager* battery, TimeManager* time);
+  ScreenManager();
+
+  String name() const override;
+  ServiceValue BatteryManager::getValue(String key) const override;
+  bool execute(String fnName, JsonVariant args) override;
+
   void displayScreen(IScreen* screen, bool display = true);
   void replaceScreen(IScreen* screen);
   void draw();

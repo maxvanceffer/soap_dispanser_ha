@@ -4,7 +4,7 @@
 #include "Utils.h"
 #include "esp_sleep.h"
 #include "driver/gpio.h"
-#include "storage/StorageManager.h"
+#include "Container.h"
 
 #if FEATURE_SOAP_MOTOR
   #include "soap_motor/SoapMotor.h"
@@ -15,7 +15,12 @@
 #endif
 
 #if FEATURE_DISTANCE_SENSOR
-  #include "distance_sensor/DistanceSensor.h"
+  #if FEATURE_DISTANCE_PIR_SENSOR
+    #include "distance_sensor/DistancePirSensor.h"
+  #endif
+  #if FEATURE_DISTANCE_TOF_SENSOR
+    #include "distance_sensor/DistanceTofSensor.h"
+  #endif
 #endif
 
 #if FEATURE_BATTERY_MANAGER
@@ -42,32 +47,33 @@
   #include "./screen/128x64/Screens.cpp"
 #endif
 
-#if FEATURE_STORAGE
-StorageManager storage;
-#endif
-
 #if FEATURE_DISTANCE_SENSOR
-DistanceSensor distanceSensor;
+ #if FEATURE_DISTANCE_PIR_SENSOR
+  DistancePirSensor distanceSensor;
+ #endif
+ #if FEATURE_DISTANCE_TOF_SENSOR
+  DistanceTofSensor distanceSensor;
+ #endif
 #endif
 
 #if FEATURE_SOAP_MOTOR
-SoapMotor soapMotor(storage);
+SoapMotor soapMotor();
 #endif
 
 #if FEATURE_SLEEP_TIMER
-SleepTimer sleepTimer(storage);
+SleepTimer sleepTimer();
 #endif
 
 #if FEATURE_BATTERY_MANAGER
-BatteryManager batteryManager(storage);
+BatteryManager batteryManager();
 #endif
 
 #if FEATURE_TIME_MANAGER
-TimeManager timeManager(storage);
+TimeManager timeManager();
 #endif
 
 #if FEATURE_SCREEN
-ScreenManager screenManager(&storage, 
+ScreenManager screenManager(
   #if FEATURE_BATTERY_MANAGER
     &batteryManager, 
   #else
@@ -103,12 +109,10 @@ void setup() {
   Serial.begin(115200);
   Serial.println("SoapDispenserOS started");
 
+  Container::getInstance().getStorage().begin();
+
   #if FEATURE_SOAP_MOTOR
     soapMotor.begin();
-  #endif
-
-  #if FEATURE_STORAGE
-    storage.begin();
   #endif
 
   #if FEATURE_DISTANCE_SENSOR
@@ -135,11 +139,11 @@ void setup() {
   Serial.print("Wakeup reason: ");
   Serial.println(wakeup_reason);
 
-  #if FEATURE_STORAGE && FEATURE_SETUP_MANAGER
-    if (storage.getItem("initial_setup", "true") == "true") {
+  #if FEATURE_SETUP_MANAGER
+    if (Container::getInstance().getStorage().getItem("initial_setup", "true") == "true") {
       Serial.println("Initial setup called");
       #if FEATURE_SCREEN
-        setupManager = new SetupManager(storage, sleepTimer, screenManager);
+        setupManager = new SetupManager(Container::getInstance().getStorage(), sleepTimer, screenManager);
         setupManager->begin();
       #else
         Serial.println("Setup requires screen feature to be enabled");

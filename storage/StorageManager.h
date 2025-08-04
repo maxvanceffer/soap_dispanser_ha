@@ -69,7 +69,7 @@ public:
     }
 
     bool save() {
-        if (!_dirty) return true;  // Нет изменений
+        if (!_dirty) return true;
         File file = LittleFS.open(_filename, "w");
         if (!file) {
             Serial.println("Failed to open file for writing");

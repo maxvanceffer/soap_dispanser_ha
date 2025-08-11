@@ -1,9 +1,10 @@
 #pragma once
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <map>
 #include <vector>
 #include "IService.h"
-#include "storage/StorageManager.h"
+#include "src/storage/StorageManager.h"
 
 /**
  * Container Class
@@ -42,11 +43,11 @@ public:
     /**
      * Get the singleton instance of the Container
      * 
-     * @return The singleton instance
+     * @return Pointer to the singleton instance
      */
-    static Container& getInstance() {
+    static Container* getInstance() {
         static Container instance;
-        return instance;
+        return &instance;
     }
     
     /**
@@ -91,10 +92,16 @@ public:
         if (it != _services.end()) {
             return it->second;
         }
-        
-        Serial.print("Container: Service '");
-        Serial.print(name);
-        Serial.println("' not found");
+
+        return nullptr;
+    }
+
+    IService* getServiceByType(IService::Type type) {
+        for (const auto& pair : _services) {
+            if (pair.second && pair.second->type() == type) {
+                return pair.second;
+            }
+        }
         return nullptr;
     }
     

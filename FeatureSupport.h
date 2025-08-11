@@ -1,3 +1,5 @@
+#include <map>
+
 /**
  * FeatureSupport Class
  *
@@ -36,7 +38,7 @@ public:
     return (it != _features.end()) ? it->second : false;
   }
 
-private:
+protected:
   /**
    * Add or update a feature
    *

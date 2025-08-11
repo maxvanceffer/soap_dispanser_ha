@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include "FeatureSupport.h"
 #include <map>
+#include <ArduinoJson.h>
 
 /**
  * ServiceValue Class
@@ -37,6 +38,12 @@ public:
     ServiceValue(float value) : _type(ValueType::FLOAT), floatValue(value) {}
     ServiceValue(const String& value) : _type(ValueType::STRING), stringValue(value) {}
     ServiceValue(const char* value) : _type(ValueType::STRING), stringValue(value) {}
+    
+    // Additional constructors for specific numeric types to resolve ambiguity
+    ServiceValue(uint32_t value) : _type(ValueType::INT), intValue(static_cast<int>(value)) {}
+    ServiceValue(long value) : _type(ValueType::INT), intValue(static_cast<int>(value)) {}
+    // Note: time_t constructor removed as it conflicts with long on this platform
+    // where time_t is defined as long
     
     // Type checking methods
     bool isBool() const { return _type == ValueType::BOOL; }
@@ -118,6 +125,18 @@ public:
  */
 class IService : public FeatureSupport {
 public:
+    enum class Type {
+        Generic,
+        Setup
+    };
+
+    /**
+     *  Uniq service. This name used, to find service by name inside container.
+     *
+     *  @return Uniq name
+     */
+    virtual String name() const = 0;
+
     /**
      * Get current value of class property. For SoapMotor, can be isDispens
      * 
@@ -136,11 +155,37 @@ public:
     virtual bool execute(String fnName, JsonVariant args) = 0;
 
     /**
+     * Execute a function without arguments.
+     *
+     * @param fnName The name of the function to execute
+     * @return A ServiceValue object that can be converted to different types
+     */
+    virtual bool execute(String fnName) {
+        StaticJsonDocument<1> doc;
+        return execute(fnName, doc.to<JsonVariant>());
+    }
+
+    /**
+     *   Service type
+     */
+    virtual Type type() const { return Type::Generic; }
+
+    /**
+     *  Common function which will be called in the loop method, for all registred services.
+     */
+    virtual void loop() {};
+
+    /**
+     * Check if this service blocks the loop
+     *
+     * @return true if this service blocks the loop, false otherwise
+     */
+    virtual bool isLoopBlocker() { return false; };
+
+    /**
      *  Show if service is ready.
      */
-    bool isReady () {
-        return _ready;
-    }
+    bool isReady () { return _ready; }
 
 protected:
     void setReady(bool ready) {

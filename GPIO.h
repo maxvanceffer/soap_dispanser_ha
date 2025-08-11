@@ -1,5 +1,8 @@
 #pragma once
 
+//
+// ESP32-C3 Super Mini
+
 // Rotary knob
 #define ROTARY_WAKEUP_PIN 33
 
@@ -19,8 +22,9 @@
 
 // Distance IR sensor
 #define DISTANCE_SENSOR_PIR_PIN 4 // not yet soldered
-#define DISTANCE_SENSOR_TOF_SDA_PIN 21 //
-#define DISTANCE_SENSOR_TOF_SCL_PIN 22 //
+#define DISTANCE_SENSOR_TOF_SDA_PIN 8 // already soldered
+#define DISTANCE_SENSOR_TOF_SCL_PIN 9 // already soldered
+#define DISTANCE_SENSOR_TOF_SHUT_PIN 3 // already soldered
 
 // PIR sensor
 #define PIR_GPIO 2 // already soldered

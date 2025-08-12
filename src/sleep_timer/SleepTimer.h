@@ -16,6 +16,7 @@ public:
     bool start();
     bool stop();
     void loop();
+    void buildSettingsSchema(JsonObject schema) const override;
 
 private:
     uint32_t _timeoutMs;

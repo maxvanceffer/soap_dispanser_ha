@@ -77,3 +77,50 @@ bool TimeManager::isTimeValid() const {
 time_t TimeManager::now() const {
   return time(nullptr);
 }
+
+void TimeManager::buildSettingsSchema(JsonObject schema) const {
+  // Initialize schema skeleton (from IService)
+  initSchemaSkeleton(schema);
+
+  JsonObject props = schema["properties"].as<JsonObject>();
+
+  // NTP server address
+  JsonObject srv = props.createNestedObject("server");
+  srv["type"] = "string";
+  srv["default"] = "pool.ntp.org"; // current hardcoded default
+  srv["title"] = "NTP server";
+  srv["description"] = "Hostname of the NTP server.";
+  {
+    JsonObject comp = srv.createNestedObject("component");
+    comp["ui"] = "input";
+    comp["type"] = "string";
+  }
+
+  // GMT offset in seconds (-12h .. +14h)
+  JsonObject gmt = props.createNestedObject("gmtOffset");
+  gmt["type"] = "integer";
+  gmt["minimum"] = -43200; // -12 hours
+  gmt["maximum"] =  50400; // +14 hours
+  gmt["default"] = (long)_gmtOffset;
+  gmt["title"] = "GMT offset (sec)";
+  gmt["description"] = "Time zone offset from UTC in seconds (-43200..50400).";
+  {
+    JsonObject comp = gmt.createNestedObject("component");
+    comp["ui"] = "input";
+    comp["type"] = "int";
+  }
+
+  // Daylight Saving offset in seconds (0..7200)
+  JsonObject dst = props.createNestedObject("daylightOffset");
+  dst["type"] = "integer";
+  dst["minimum"] = 0;
+  dst["maximum"] = 7200;
+  dst["default"] = (int)_daylightOffset;
+  dst["title"] = "Daylight offset (sec)";
+  dst["description"] = "DST offset in seconds (0..7200).";
+  {
+    JsonObject comp = dst.createNestedObject("component");
+    comp["ui"] = "input";
+    comp["type"] = "int";
+  }
+}

@@ -63,6 +63,34 @@ void DistanceTofSensor::loop() {
   }
 }
 
+void DistanceTofSensor::buildSettingsSchema(JsonObject schema) const {
+  // Initialize base schema skeleton from IService
+  initSchemaSkeleton(schema);
+
+  // Ensure "properties" exists and is an object
+  JsonObject props = schema["properties"].as<JsonObject>();
+
+  // Bounds in millimeters: 6 cm .. 15 cm
+  const int kMinMm = 60;
+  const int kMaxMm = 150;
+
+  int def = handDetectThresholdMm;
+  if (def < kMinMm) def = kMinMm;
+  if (def > kMaxMm) def = kMaxMm;
+
+  JsonObject thr = props.createNestedObject("hand_distance_threshold");
+  thr["type"] = "integer";
+  thr["minimum"] = kMinMm;
+  thr["maximum"] = kMaxMm;
+  thr["default"] = def;
+  thr["title"] = "Hand detection threshold (mm)";
+  thr["description"] = "Distance in millimeters to detect a hand (60–150 mm).";
+
+  JsonObject comp = thr.createNestedObject("component");
+  comp["ui"] = "input";
+  comp["type"] = "int";
+}
+
 bool DistanceTofSensor::detectHand() const {
   VL53L0X_RangingMeasurementData_t measure;
   lox.rangingTest(&measure, false);

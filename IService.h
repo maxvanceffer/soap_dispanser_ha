@@ -166,6 +166,28 @@ public:
     }
 
     /**
+     * Whether this service exposes user-configurable settings.
+     * SetupManager should check this before calling buildSettingsSchema().
+     * Default is false so services without settings don't need to override anything.
+     */
+    virtual bool hasSettingsSchema() const { return false; }
+
+    /**
+     * Build JSON Schema (draft-07) that describes ONLY this service's settings.
+     * The caller provides a root `schema` object to be filled. Typical fields:
+     *  - "$schema": "http://json-schema.org/draft-07/schema#"
+     *  - "$id": a stable identifier for this service (e.g., "spha://" + name())
+     *  - "title": human-friendly title (usually `name()`)
+     *  - "type": "object"
+     *  - "properties": { ... }  // keys for this service only
+     *  - "required": [ ... ]     // optional
+     *
+     * Default implementation creates a skeleton (no properties). Override in
+     * derived classes to add your keys under `properties` and `required`.
+     */
+    virtual void buildSettingsSchema(JsonObject schema) const;
+
+    /**
      *   Service type
      */
     virtual Type type() const { return Type::Generic; }
@@ -183,6 +205,12 @@ public:
     virtual bool isLoopBlocker() { return false; };
 
     /**
+     * If service has configuration parameters
+     * @return true if service something to configure
+     */
+    virtual bool hasSettingsSchema() const { return false; }
+
+    /**
      *  Show if service is ready.
      */
     bool isReady () { return _ready; }
@@ -192,6 +220,36 @@ protected:
         _ready = ready;
     };
 
+    /**
+     * Helper: initialize a minimal JSON Schema skeleton into `schema`.
+     * Creates "$schema", "$id", "title", "type":"object" and an empty
+     * "properties" object if they are missing.
+     */
+    void initSchemaSkeleton(JsonObject schema) const;
+
 private:
     bool _ready = false;
 };
+
+inline void IService::buildSettingsSchema(JsonObject schema) const {
+    // Provide a safe default so existing services don't break if not overridden
+    initSchemaSkeleton(schema);
+}
+
+inline void IService::initSchemaSkeleton(JsonObject schema) const {
+    if (!schema.containsKey("$schema")) {
+        schema["$schema"] = "http://json-schema.org/draft-07/schema#";
+    }
+    if (!schema.containsKey("$id")) {
+        schema["$id"] = String("spha://") + name();
+    }
+    if (!schema.containsKey("title")) {
+        schema["title"] = name();
+    }
+    if (!schema.containsKey("type")) {
+        schema["type"] = "object";
+    }
+    if (!schema.containsKey("properties")) {
+        schema.createNestedObject("properties");
+    }
+}

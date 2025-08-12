@@ -14,6 +14,7 @@
 #include <string>
 
 #include <Arduino.h>
+#include <ESPmDNS.h>
 
 #define DEVICE_MODEL "DefaultSoapDispenser"
 
@@ -39,6 +40,8 @@ static NimBLECharacteristic* gChModel  = nullptr;
 static NimBLECharacteristic* gChSsid   = nullptr;
 static NimBLECharacteristic* gChPass   = nullptr;
 static NimBLECharacteristic* gChStatus = nullptr;
+
+static std::string gDeviceName; // shared BLE/MDNS hostname (without .local)
 
 class ServerCallbacks : public NimBLEServerCallbacks {
   void onConnect(NimBLEServer* pServer) {
@@ -105,6 +108,9 @@ class ProvCallbacks : public NimBLECharacteristicCallbacks {
 
       // Attempt WiFi connection after receiving password
       WiFi.softAPdisconnect(true);
+      if (!gDeviceName.empty()) {
+        WiFi.setHostname(gDeviceName.c_str());
+      }
       WiFi.mode(WIFI_STA);
       WiFi.begin(targetSsid.c_str(), storage.getItem("wifi_password", "").c_str());
 
@@ -133,11 +139,17 @@ class ProvCallbacks : public NimBLECharacteristicCallbacks {
         gChStatus->notify();
       }
 
+      // If connected, start mDNS so the browser can discover us by hostname
       if (ok) {
-        storage.setItem("initial_setup","false");
-        storage.save();
-        delay(1000);
-        ESP.restart();
+        const char* host = !gDeviceName.empty() ? gDeviceName.c_str() : "dispenser";
+        if (!MDNS.begin(host)) {
+          Serial.println("mDNS: start FAILED");
+        } else {
+          MDNS.addService("http", "tcp", 80);
+          Serial.printf("mDNS: started, browse http://%s.local/\n", host);
+        }
+
+        // Do NOT mark setup complete here; wait until /setup POST saves settings
       }
       return;
     }
@@ -186,6 +198,7 @@ void SetupManager::begin() {
     mac.replace(":", "");          // "AABBCCDDEEFF"
     String tail = mac.substring(mac.length() - 4); // "EEFF"
     std::string devName = std::string("dispenser-") + std::string(tail.c_str());
+    gDeviceName = devName; // keep for later (e.g., mDNS after WiFi connect)
 
     bool inited = NimBLEDevice::init(devName);
     Serial.printf("NimBLE init: %s\n", inited ? "OK" : "FAIL");
@@ -281,6 +294,34 @@ void SetupManager::begin() {
         _server.send(200, "text/html", INDEX_HTML);
         _clientConnected = true;
         _lastInteraction = millis();
+    });
+
+    _server.on("/schema", HTTP_GET, [this]() {
+        // Build unified top-level JSON Schema (draft-07)
+        DynamicJsonDocument doc(24576);
+        JsonObject root = doc.to<JsonObject>();
+
+        // Top-level schema metadata
+        root["$schema"] = "http://json-schema.org/draft-07/schema#";
+        const char* host = !gDeviceName.empty() ? gDeviceName.c_str() : "dispenser";
+        root["$id"] = String("spha://") + host + "/setup";
+        root["title"] = String(host) + " Setup";
+        root["type"] = "object";
+
+        // Each service with settings becomes a nested object under properties
+        JsonObject props = root.createNestedObject("properties");
+
+        auto all = Container::getInstance()->getAllServices();
+        for (IService* svc : all) {
+            if (!svc || !svc->hasSettingsSchema()) continue;
+            JsonObject serviceSchema = props.createNestedObject(svc->name());
+            // Ask the service to populate its own object schema
+            svc->buildSettingsSchema(serviceSchema);
+        }
+
+        String out;
+        serializeJson(doc, out);
+        _server.send(200, "application/json", out);
     });
 
     _server.on("/setup", HTTP_POST, [this, &_storage, _screenManager]() {

@@ -82,3 +82,31 @@ void SleepTimer::loop() {
         Serial.printf("💤 Осталось до сна: %lu сек\n", remaining / 1000);
     }
 }
+
+void SleepTimer::buildSettingsSchema(JsonObject schema) const {
+    // Prepare base JSON Schema skeleton
+    initSchemaSkeleton(schema);
+
+    JsonObject props = schema["properties"].as<JsonObject>();
+
+    // Bounds in milliseconds: 10s .. 30s
+    const uint32_t kMin = 10000; // 10 seconds
+    const uint32_t kMax = 30000; // 30 seconds
+
+    uint32_t def = _timeoutMs;
+    if (def < kMin) def = kMin;
+    if (def > kMax) def = kMax;
+
+    JsonObject t = props.createNestedObject("sleep_timeout_ms");
+    t["type"] = "integer";
+    t["minimum"] = kMin;
+    t["maximum"] = kMax;
+    t["default"] = def;
+    t["title"] = "Sleep timeout (ms)";
+    t["description"] = "Device enters deep sleep after this idle time (10–30 seconds).";
+
+    // UI metadata (not part of JSON Schema)
+    JsonObject comp = t.createNestedObject("component");
+    comp["ui"] = "input";
+    comp["type"] = "int";
+}

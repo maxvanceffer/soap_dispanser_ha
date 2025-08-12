@@ -14,12 +14,14 @@ public:
 
     String name() const;
     ServiceValue getValue(String key) const;
-    bool execute(String fnName, JsonVariant args);
 
     void begin();
-
     void setMode(Mode mode);
     void dispense();
+    void buildSettingsSchema(JsonObject schema) const override;
+
+    bool hasSettingsSchema() const override { return true; }
+    bool execute(String fnName, JsonVariant args);
 
 private:
     Mode _mode;

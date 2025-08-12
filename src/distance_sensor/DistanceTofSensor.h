@@ -15,7 +15,9 @@ public:
 
     void begin();
     void loop();
+    void buildSettingsSchema(JsonObject schema) const override;
 
+    bool hasSettingsSchema() const override { return true; }
     bool detectHand() const;
 
 private:

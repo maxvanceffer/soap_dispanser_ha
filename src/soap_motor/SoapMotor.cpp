@@ -94,6 +94,38 @@ bool SoapMotor::execute(String fnName, JsonVariant args) {
   return false;
 }
 
+void SoapMotor::buildSettingsSchema(JsonObject schema) const {
+    // Initialize base schema skeleton from IService
+    initSchemaSkeleton(schema);
+
+    JsonObject props = schema["properties"].as<JsonObject>();
+
+    // 1) Mode selector
+    JsonObject m = props.createNestedObject("mode");
+    m["type"] = "string";
+    JsonArray en = m.createNestedArray("enum");
+    en.add("SMALL");
+    en.add("MEDIUM");
+    en.add("LARGE");
+
+    const char* defMode = "MEDIUM";
+    switch (_mode) {
+        case Mode::SMALL:  defMode = "SMALL"; break;
+        case Mode::LARGE:  defMode = "LARGE"; break;
+        case Mode::MEDIUM: default: defMode = "MEDIUM"; break;
+    }
+    m["default"] = defMode;
+    m["title"] = "Dispense mode";
+    m["description"] = "Preset amount of soap.";
+
+    // UI metadata for mode (not part of JSON Schema)
+    {
+      JsonObject comp = m.createNestedObject("component");
+      comp["ui"] = "select";
+      comp["type"] = "string";
+    }
+}
+
 unsigned int SoapMotor::getDurationForMode(Mode mode) {
     switch (mode) {
         case Mode::SMALL: return 300;

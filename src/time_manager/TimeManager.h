@@ -12,9 +12,11 @@ public:
   String name() const override;
   ServiceValue getValue(String key) const override;
   bool execute(String fnName, JsonVariant args) override;
+  void buildSettingsSchema(JsonObject schema) const override;
   bool begin(long gmtOffset = 10800, int daylightOffset = 0);
   String getFormattedTime() const;
   bool isTimeValid() const;
+  bool hasSettingsSchema() const override { return true; }
   time_t now() const;
 
 private:
